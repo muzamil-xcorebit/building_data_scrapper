@@ -1,10 +1,10 @@
 const fs = require("fs");
 const { chromium } = require("playwright");
 
-const PROXY_HOST = "155.254.34.102";
-const PROXY_PORT = "6082";
-const PROXY_USER = "xcorebit";
-const PROXY_PASS = "slbjuiiza19f";
+const PROXY_HOST = process.env.PROXY_HOST || "";
+const PROXY_PORT = process.env.PROXY_PORT || "";
+const PROXY_USER = process.env.PROXY_USER || "";
+const PROXY_PASS = process.env.PROXY_PASS || "";
 
 const TARGET_URL = "https://citydev-portal.edinburgh.gov.uk/idoxpa-web/scottishBuildingWarrantDetails.do?keyVal=T1A67ZEWK0T00&activeTab=summary";
 
@@ -12,16 +12,24 @@ async function run() {
   let browser;
   try {
     browser = await chromium.launch({ headless: true });
-    const context = await browser.newContext({
-      proxy: {
-        server: `http://${PROXY_HOST}:${PROXY_PORT}`,
-        username: PROXY_USER,
-        password: PROXY_PASS
-      },
+    const contextOptions = {
       userAgent:
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       viewport: { width: 1280, height: 800 }
-    });
+    };
+
+    if (PROXY_HOST && PROXY_PORT) {
+      contextOptions.proxy = {
+        server: `http://${PROXY_HOST}:${PROXY_PORT}`,
+        username: PROXY_USER || undefined,
+        password: PROXY_PASS || undefined
+      };
+      console.log(`Using proxy ${PROXY_HOST}:${PROXY_PORT} (username ${PROXY_USER ? "set" : "not set"})`);
+    } else {
+      console.log("No proxy configured via environment variables; running direct connection");
+    }
+
+    const context = await browser.newContext(contextOptions);
 
     const page = await context.newPage();
     await page.goto(TARGET_URL, { waitUntil: "networkidle", timeout: 30000 });
