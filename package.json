@@ -1,0 +1,13 @@
+{
+  "name": "building-data-scrapper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "scrape": "node src/scrape.js"
+  },
+  "dependencies": {
+    "playwright": "^1.41.1"
+  }
+}
+
