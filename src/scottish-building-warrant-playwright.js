@@ -14,7 +14,11 @@ const DEFAULT_CONTEXT_OPTIONS = {
 };
 
 async function set_browser() {
-  return await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ headless: true });
+  const contextOptions = set_proxy();
+  const context = await browser.newContext(contextOptions);
+  const page = await context.newPage();
+  return page;
 }
 
 function set_proxy() {
@@ -66,22 +70,25 @@ async function further_information_extraction(page) {
 }
 
 async function Main() {
-  let browser;
+  let page;
   try {
-    browser = await set_browser();
-    const contextOptions = set_proxy();
-    const context = await browser.newContext(contextOptions);
-    const page = await context.newPage();
+    page = await set_browser();
     await page.goto(TARGET_URL, { waitUntil: "networkidle", timeout: 30000 });
     await page.waitForTimeout(1000);
-    const data = { url: await page.url(), title: await page.title(), summary: {}, furtherInformation: {} };
-    data.summary = await summary_extraction(page);
+    const url = page.url();
+    const titlePromise = page.title();
+    const summaryPromise = summary_extraction(page);
+    const [title, summary] = await Promise.all([titlePromise, summaryPromise]);
+    const data = { url, title, summary: {}, furtherInformation: {} };
+    data.summary = summary;
     data.furtherInformation = await further_information_extraction(page);
-    await fs.promises.writeFile("output.json", JSON.stringify(data, null, 2));
-    await browser.close();
+    await Promise.all([
+      fs.promises.writeFile("output.json", JSON.stringify(data, null, 2)),
+      page.context().browser().close()
+    ]);
     process.exit(0);
   } catch (err) {
-    if (browser) await browser.close();
+    if (page) await page.context().browser().close();
     console.error(err && err.stack ? err.stack : err);
     process.exit(1);
   }
