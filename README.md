@@ -27,6 +27,15 @@ Set these environment variables if you need to route traffic through a proxy:
 - PROXY_USER
 - PROXY_PASS
 
+If you store variables in a `.env` file, load them into your current shell session before running the scrapers. For zsh/bash you can run:
+
+```bash
+set -a && source .env && set +a
+npm run scrape:pw
+```
+
+This exports all variables from `.env` into the current terminal session so `process.env` is available to the scripts.
+
 How it works
 
 - Launches headless Chromium via Playwright.
