@@ -7,6 +7,9 @@ const { URL, URLSearchParams } = require("url");
 const START_URL = "https://wnc.planning-register.co.uk/Disclaimer?returnUrl=%2FBuildingControl%2FDisplay%2FFP%2F2025%2F0159";
 const OUTPUT_FILE = "output-wnc.json";
 
+const SKIP_LABEL = 'Copy notices are not available from the Local Authority for Fensa, Competent Persons or Approved Inspectors Applications - Please see specific notes below.';
+
+// Default headers to mimic a real browser and avoid bot detection
 const DEFAULT_HEADERS = {
   "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
   accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -18,6 +21,7 @@ function normalizeKey(k) {
 }
 
 function createClient() {
+  // Keep cookies between requests so the session state is preserved
   const cookieJar = new CookieJar();
   return got.extend({
     cookieJar,
@@ -28,6 +32,7 @@ function createClient() {
 }
 
 function parseTableRowsAsArray($, table) {
+  // Convert table rows into an array of cell text arrays
   const rows = [];
   $(table).find("tr").each((i, tr) => {
     const cells = $(tr).find("th,td").map((ii, td) => $(td).text().trim()).get();
@@ -72,7 +77,6 @@ function extractMainDetails($) {
   const table = $("#Main-Details").find("table").first();
   if (!table || !table.length) return main;
 
-  const SKIP_LABEL = 'Copy notices are not available from the Local Authority for Fensa, Competent Persons or Approved Inspectors Applications - Please see specific notes below.';
   table.find("td").each((i, td) => {
     const tdHtml = $(td).html() || "";
     const parts = tdHtml.split(/<br\s*\/?>/i);
@@ -101,7 +105,7 @@ async function Main() {
   try {
     const client = createClient();
     const start = await client.get(START_URL);
-    const pageHtml = await clickAgree(client, start.body);
+    const pageHtml = await clickAgree(client, start.body); // Click the 'Agree' button on the disclaimer page
     const $ = cheerio.load(pageHtml);
 
     const result = {

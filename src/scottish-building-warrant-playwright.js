@@ -22,6 +22,7 @@ async function set_browser() {
 }
 
 function set_proxy() {
+  // Build context options and add proxy settings if provided via env
   const opts = DEFAULT_CONTEXT_OPTIONS;
   if (PROXY_HOST && PROXY_PORT) {
     opts.proxy = {
@@ -34,6 +35,7 @@ function set_proxy() {
 }
 
 async function extractVisibleFields(page) {
+  // Extract datafrom tables on the page
   return await page.evaluate(() => {
     const result = {};
     const tables = Array.from(document.querySelectorAll("table"));
@@ -61,7 +63,7 @@ async function summary_extraction(page) {
 
 async function further_information_extraction(page) {
   try {
-    await page.click("text=Further Information");
+    await page.click("text=Further Information"); // Click the 'Further Information' tab
     await page.waitForTimeout(700);
     return await extractVisibleFields(page);
   } catch (e) {
@@ -74,7 +76,6 @@ async function Main() {
   try {
     page = await set_browser();
     await page.goto(TARGET_URL, { waitUntil: "networkidle", timeout: 30000 });
-    await page.waitForTimeout(1000);
     const url = page.url();
     const titlePromise = page.title();
     const summaryPromise = summary_extraction(page);
