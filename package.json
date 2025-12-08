@@ -4,10 +4,14 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "scrape:pw": "node src/scottish-building-warrant-playwright.js"
+    "scrape:pw": "node src/scottish-building-warrant-playwright.js",
+    "scrape:got": "node src/wnc-building-control-got.js"
   },
   "dependencies": {
-    "playwright": "^1.41.1"
+    "playwright": "^1.41.1",
+    "got": "^11.8.5",
+    "cheerio": "^1.0.0-rc.12",
+    "tough-cookie": "^4.0.0"
   }
 }
 

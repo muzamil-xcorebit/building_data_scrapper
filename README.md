@@ -39,3 +39,18 @@ Notes
 
 - This website is not available in our country; therefore the Playwright scraper is configured to use a proxy when needed.
 
+WNC building control scraper
+
+- Run the scraper:
+
+```bash
+npm run scrape:got
+```
+
+How it works
+
+  - Uses `got` + `cheerio` to request pages and parse HTML.
+  - Submits the disclaimer form (clicks "Agree") to reach the page content.
+  - Extracts the main details from the `#Main-Details` table, the `#Plots` table and the `#Site-history` table.
+  - Saves structured arrays for `plots` and `siteHistory` using table headers as object keys.
+  - Saves structured JSON to `output-wnc.json` with `main`, `plots` and `siteHistory` sections.
