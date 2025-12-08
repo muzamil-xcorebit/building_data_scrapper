@@ -35,3 +35,7 @@ How it works
 - Saves structured JSON to `output.json` (includes `summary` and `furtherInformation`).
 - Error handling ensures the browser closes on failure.
 
+Notes
+
+- This website is not available in our country; therefore the Playwright scraper is configured to use a proxy when needed.
+
